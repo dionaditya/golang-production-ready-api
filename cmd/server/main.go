@@ -8,12 +8,20 @@ import (
 	"github.com/dionaditya/go-production-ready-api/internal/database"
 	transportHTTP "github.com/dionaditya/go-production-ready-api/internal/transport"
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
 )
 
-type App struct{}
+type App struct {
+	Name    string
+	version string
+}
 
 func (app *App) Run() error {
-	fmt.Println("Setting up our REST API")
+	log.SetFormatter(&log.JSONFormatter{})
+	log.WithFields(log.Fields{
+		"AppName": app.Name,
+		"Version": app.version,
+	}).Info("Setting our app")
 
 	var err error
 	db, err := database.NewDatabase()
@@ -25,7 +33,7 @@ func (app *App) Run() error {
 	err = database.MigrateDB(db)
 
 	if err != nil {
-		fmt.Println("failed auto migrate")
+		log.Error("Failed to set up database")
 	}
 
 	commentService := comment.NewService(db)
@@ -34,7 +42,7 @@ func (app *App) Run() error {
 	handler.SetupRoutes()
 
 	if err := http.ListenAndServe(":8000", handler.Router); err != nil {
-		fmt.Println("Failed setup routes")
+		log.Error("failed to set up server")
 	}
 	return nil
 }
@@ -43,12 +51,12 @@ func main() {
 	err := godotenv.Load(".env")
 
 	if err != nil {
-		fmt.Println("failed to load env")
+		log.Error("failed to parse .env")
 	}
 	app := App{}
 
 	if err := app.Run(); err != nil {
-		fmt.Println("Error starting our app")
+		log.Error("failed to start app")
 		fmt.Println(err)
 	}
 }
