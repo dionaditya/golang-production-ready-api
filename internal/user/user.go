@@ -31,6 +31,8 @@ type Payload struct {
 type UserService interface {
 	Register(user models.User) (Payload, error)
 	Login(user string, password string) (Payload, error)
+	UpdateUser(email string, newUsername string) (Payload, error)
+	UpdatePassowrd(email, newPassword string) (bool, error)
 	Validate(user models.User) (User error)
 	RefreshToken(refreshToken string) (Payload, error)
 }
@@ -186,4 +188,31 @@ func GenerateJWT(userId uint, email string) (Token, error) {
 	}
 
 	return Token{Access_Token: tokenString, Refresh_Token: rt}, nil
+}
+
+func (s *Service) GetUser(ID uint) (models.User, error) {
+	var user models.User
+	if result := s.DB.First(&user, ID); result.Error != nil {
+		return models.User{}, result.Error
+	}
+
+	return user, nil
+}
+
+func (s *Service) UpdateUser(ID uint, newData struct{ Username string }) (models.User, error) {
+	user, err := s.GetUser(ID)
+
+	tempUser := user
+
+	tempUser.Username = newData.Username
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	if result := s.DB.Model(&user).Updates(tempUser); result.Error != nil {
+		return models.User{}, result.Error
+	}
+
+	return tempUser, nil
 }
