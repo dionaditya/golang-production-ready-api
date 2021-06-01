@@ -9,14 +9,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
+func (h *CommentControlelr) GetComment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	i, err := strconv.ParseUint(id, 10, 64)
 
 	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
-	w.WriteHeader(http.StatusOK)
 
 	if err != nil {
 		sendErrorResponse(w, "Failed to parse ID", err)
@@ -28,12 +27,14 @@ func (h *Handler) GetComment(w http.ResponseWriter, r *http.Request) {
 		sendErrorResponse(w, "Failed to retrieve comment by ID", err)
 	}
 
+	w.WriteHeader(http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(&comment); err != nil {
 		panic(err)
 	}
 }
 
-func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
+func (h *CommentControlelr) GetAllComments(w http.ResponseWriter, r *http.Request) {
 	comments, err := h.Service.GetComments()
 	if err != nil {
 		sendErrorResponse(w, "failed to retrieve all comments", err)
@@ -49,9 +50,8 @@ func (h *Handler) GetAllComments(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
+func (h *CommentControlelr) PostComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
-	w.WriteHeader(http.StatusOK)
 
 	var comment comment.Comment
 
@@ -65,12 +65,14 @@ func (h *Handler) PostComment(w http.ResponseWriter, r *http.Request) {
 		sendErrorResponse(w, "failed to post new comments", err)
 	}
 
+	w.WriteHeader(http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(&comment); err != nil {
 		panic(err)
 	}
 }
 
-func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
+func (h *CommentControlelr) UpdateComment(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -78,7 +80,6 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 	commentID, err := strconv.ParseUint(id, 10, 64)
 
 	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
-	w.WriteHeader(http.StatusOK)
 
 	var comment comment.Comment
 
@@ -92,12 +93,14 @@ func (h *Handler) UpdateComment(w http.ResponseWriter, r *http.Request) {
 		sendErrorResponse(w, "failed to update comments with ID"+id, err)
 	}
 
+	w.WriteHeader(http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(&comment); err != nil {
 		panic(err)
 	}
 }
 
-func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
+func (h *CommentControlelr) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -108,9 +111,10 @@ func (h *Handler) DeleteComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
-	w.WriteHeader(http.StatusOK)
 
 	err = h.Service.DeleteComment(uint(commentID))
+
+	w.WriteHeader(http.StatusOK)
 
 	if err != nil {
 		sendErrorResponse(w, "failed to delete comment with ID"+id, err)

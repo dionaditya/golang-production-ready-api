@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dionaditya/go-production-ready-api/internal/comment"
 	"github.com/dionaditya/go-production-ready-api/internal/database"
 	transportHTTP "github.com/dionaditya/go-production-ready-api/internal/transport"
 	"github.com/joho/godotenv"
@@ -36,9 +35,8 @@ func (app *App) Run() error {
 		log.Error("Failed to set up database")
 	}
 
-	commentService := comment.NewService(db)
+	handler := transportHTTP.NewHandler(db)
 
-	handler := transportHTTP.NewHandler(commentService)
 	handler.SetupRoutes()
 
 	if err := http.ListenAndServe(":8000", handler.Router); err != nil {
@@ -53,7 +51,11 @@ func main() {
 	if err != nil {
 		log.Error("failed to parse .env")
 	}
-	app := App{}
+
+	app := App{
+		Name:    "comment-api",
+		version: "1.0.0",
+	}
 
 	if err := app.Run(); err != nil {
 		log.Error("failed to start app")

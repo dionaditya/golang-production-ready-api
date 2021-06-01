@@ -44,7 +44,7 @@ func (s *Service) GetComment(ID uint) (Comment, error) {
 
 func (s *Service) GetCommentsByslug(slug string) ([]Comment, error) {
 	var comments []Comment
-	if result := s.DB.Find(&comments).Where("slug = ?", slug); result != nil {
+	if result := s.DB.Find(&comments).Where("slug = ?", slug); result.Error != nil {
 		return []Comment{}, result.Error
 	}
 

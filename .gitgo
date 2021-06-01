@@ -1,0 +1,38 @@
+{
+  "current_issue": {
+    "number": "",
+    "labels": [
+      ""
+    ],
+    "title": ""
+  },
+  "commit_guidelines": [
+    "fix #"
+  ],
+  "custom_guidelines": false,
+  "selected_commit_type": "✨ Adding a new user-facing feature",
+  "emojis": {
+    "initial_commit": "tada",
+    "feature": "sparkles",
+    "ui": "art",
+    "code_quality": "package",
+    "performance": "racehorse",
+    "security": "lock",
+    "config": "wrench",
+    "accessibility": "wheelchair",
+    "dev_tools": "rocket",
+    "docs": "pencil",
+    "release": "gem",
+    "bug_fix": "bug",
+    "crash": "boom",
+    "cleanup": "fire",
+    "wip": "construction"
+  },
+  "existing_branches": [
+    ""
+  ],
+  "current_branch": "main",
+  "current_commit_message": "âœ¨ Implement comment service\n",
+  "use_emojis": true,
+  "commit_config": false
+}
