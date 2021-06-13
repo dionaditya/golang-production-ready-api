@@ -151,7 +151,6 @@ func (h *Handler) SetupRoutes() {
 
 func sendErrorResponse(w http.ResponseWriter, message string, err error) {
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
 
 	if err := json.NewEncoder(w).Encode(Response{Message: message, Error: err.Error()}); err != nil {
 		panic(err)

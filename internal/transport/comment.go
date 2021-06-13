@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -51,7 +52,6 @@ func (h *CommentControlelr) GetAllComments(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *CommentControlelr) PostComment(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
 
 	var comment comment.Comment
 
@@ -61,7 +61,10 @@ func (h *CommentControlelr) PostComment(w http.ResponseWriter, r *http.Request) 
 
 	comment, err := h.Service.PostCmoment(comment)
 
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
+
 	if err != nil {
+		fmt.Println(err)
 		sendErrorResponse(w, "failed to post new comments", err)
 	}
 
