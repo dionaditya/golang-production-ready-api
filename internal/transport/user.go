@@ -26,8 +26,6 @@ func (h *UserController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-
 	if err := json.NewEncoder(w).Encode(&payload); err != nil {
 		panic(err)
 	}

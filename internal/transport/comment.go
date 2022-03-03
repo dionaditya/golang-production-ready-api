@@ -2,7 +2,8 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -55,24 +56,31 @@ func (h *CommentControlelr) PostComment(w http.ResponseWriter, r *http.Request) 
 
 	var comment comment.Comment
 
-	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		sendErrorResponse(w, "failed to decode json", err)
-	}
-
-	comment, err := h.Service.PostCmoment(comment)
-
 	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
 
-	if err != nil {
-		fmt.Println(err)
-		sendErrorResponse(w, "failed to post new comments", err)
+	err := json.NewDecoder(r.Body).Decode(&comment)
+
+	switch {
+	case err != nil:
+		sendErrorResponse(w, "failed to decode json", err)
+
+	case err != nil && err == io.EOF:
+		sendErrorResponse(w, "body request is empty", err)
+
+	case len(comment.Author) == 0 || len(comment.Slug) == 0:
+		sendErrorResponse(w, "invalid body params", errors.New("invalid body params"))
+	default:
+		comment, err = h.Service.PostCmoment(comment)
+
+		if err != nil {
+			sendErrorResponse(w, "failed to post new comments", err)
+		}
+
+		if err := json.NewEncoder(w).Encode(&comment); err != nil {
+			panic(err)
+		}
 	}
 
-	w.WriteHeader(http.StatusOK)
-
-	if err := json.NewEncoder(w).Encode(&comment); err != nil {
-		panic(err)
-	}
 }
 
 func (h *CommentControlelr) UpdateComment(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +89,6 @@ func (h *CommentControlelr) UpdateComment(w http.ResponseWriter, r *http.Request
 	id := vars["id"]
 
 	commentID, err := strconv.ParseUint(id, 10, 64)
-
-	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
 
 	var comment comment.Comment
 
@@ -96,7 +102,7 @@ func (h *CommentControlelr) UpdateComment(w http.ResponseWriter, r *http.Request
 		sendErrorResponse(w, "failed to update comments with ID"+id, err)
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json; charse=UTF-8")
 
 	if err := json.NewEncoder(w).Encode(&comment); err != nil {
 		panic(err)
@@ -117,11 +123,8 @@ func (h *CommentControlelr) DeleteComment(w http.ResponseWriter, r *http.Request
 
 	err = h.Service.DeleteComment(uint(commentID))
 
-	w.WriteHeader(http.StatusOK)
-
 	if err != nil {
 		sendErrorResponse(w, "failed to delete comment with ID"+id, err)
-
 	}
 
 	if err := json.NewEncoder(w).Encode(Response{Message: "Comment successfully deleted"}); err != nil {

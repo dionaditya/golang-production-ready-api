@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/dionaditya/go-production-ready-api/internal/user"
+
+	"crypto/rand"
 )
 
 type Comments struct {
@@ -33,15 +35,37 @@ type ErrorMessage struct {
 	Message string
 }
 
+var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-"
+
+func randomString() string {
+	ll := len(chars)
+
+	length := 8
+
+	b := make([]byte, length)
+	rand.Read(b) // generates len(b) random bytes
+	for i := 0; i < length; i++ {
+		b[i] = chars[int(b[i])%ll]
+	}
+	return string(b)
+}
+
+var email = randomString() + "@gmail.com"
+var password = randomString()
+
 func TestSignUp(t *testing.T) {
 	fmt.Println("Running E2E for sign up user")
 
 	client := resty.New()
 
-	resp, err := client.R().SetBody(&models.User{
-		Username: "test1234",
-		Email:    "test122@gmail.com",
-		Password: "semarang11",
+	resp, err := client.R().SetBody(struct {
+		Username string
+		Email    string
+		Password string
+	}{
+		Username: "test1235",
+		Email:    email,
+		Password: password,
 	}).Post(BASE_URL + "/api/register")
 
 	if err != nil {
@@ -54,6 +78,8 @@ func TestSignUp(t *testing.T) {
 		fmt.Println(err)
 	}
 
+	fmt.Println(resp.RawResponse, resp.Request)
+
 	assert.Equal(t, 200, resp.StatusCode())
 }
 
@@ -63,8 +89,8 @@ func TestLogin(t *testing.T) {
 	client := resty.New()
 
 	resp, err := client.R().SetBody(&models.User{
-		Email:    "test12@gmail.com",
-		Password: "semarang11",
+		Email:    email,
+		Password: password,
 	}).Post(BASE_URL + "/api/login")
 
 	if err != nil {
@@ -87,8 +113,18 @@ func TestGetComments(t *testing.T) {
 	fmt.Println("Running E2E test for get comments")
 
 	client := resty.New()
-	client.SetAuthToken(os.Getenv("access_token"))
+
 	resp, err := client.R().Get(BASE_URL + "/api/comment")
+
+	if err != nil {
+		t.Fail()
+	}
+
+	assert.Equal(t, 403, resp.StatusCode())
+
+	client.SetAuthToken(os.Getenv("access_token"))
+
+	resp, err = client.R().Get(BASE_URL + "/api/comment")
 
 	if err != nil {
 		t.Fail()
@@ -101,11 +137,35 @@ func TestPostComment(t *testing.T) {
 	fmt.Println("Running E2E for post new comments")
 
 	client := resty.New()
+
+	resp, err := client.R().SetBody(struct {
+	}{}).Post(BASE_URL + "/api/comment")
+
+	if err != nil {
+		t.Fail()
+	}
+
+	assert.Equal(t, 403, resp.StatusCode())
+
 	client.SetAuthToken(os.Getenv("access_token"))
-	resp, err := client.R().SetBody(&Comment{
-		Slug:   "/testing",
-		Author: "john doe",
-		Body:   "fix",
+
+	resp, err = client.R().SetBody(struct {
+	}{}).Post(BASE_URL + "/api/comment")
+
+	if err != nil {
+		t.Fail()
+	}
+
+	assert.Equal(t, 500, resp.StatusCode())
+
+	resp, err = client.R().SetBody(struct {
+		Slug   string
+		Body   string
+		Author string
+	}{
+		Slug:   "teste",
+		Body:   "re",
+		Author: "re",
 	}).Post(BASE_URL + "/api/comment")
 
 	if err != nil {

@@ -132,6 +132,7 @@ func (h *Handler) SetupRoutes() {
 	h.Router.HandleFunc("/api/refresh-token", userController.RefreshToken).Methods("POST")
 	h.Router.HandleFunc("/api/register", userController.Register).Methods("POST")
 	h.Router.HandleFunc("/api/login", userController.Login).Methods("POST")
+
 	h.Router.HandleFunc("/api/user/{id}", userController.UpdateUser).Methods("PUT")
 	h.Router.HandleFunc("/api/comment", commentController.GetAllComments).Methods("GET")
 	h.Router.HandleFunc("/api/comment", commentController.PostComment).Methods("POST")

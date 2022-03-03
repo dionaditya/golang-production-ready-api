@@ -8,7 +8,7 @@ import (
 type User struct {
 	gorm.Model
 	Email    string
-	Password string
+	Password string `json:",omitempty"`
 	Username string
 }
 

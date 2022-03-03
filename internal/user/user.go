@@ -18,8 +18,8 @@ type Service struct {
 }
 
 type Token struct {
-	Access_Token  string
-	Refresh_Token string
+	Access_Token  string `json:",omitempty"`
+	Refresh_Token string `json:",omitempty"`
 }
 
 //a struct to rep user account
@@ -84,10 +84,9 @@ func (s *Service) Register(user models.User) (Payload, error) {
 		return Payload{}, errors.New("Failed to create account, connection error")
 	}
 
-	token, _ := GenerateJWT(user.ID, user.Email)
 	user.Password = ""
 
-	payload := Payload{Token: token, User: user}
+	payload := Payload{User: user}
 	return payload, nil
 }
 
@@ -102,7 +101,8 @@ func (s *Service) Login(email, password string) (Payload, error) {
 		return Payload{}, errors.New("Email address not found")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user[0].Password), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password))
+
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
 		return Payload{}, errors.New("Invalid login credential")
 	}

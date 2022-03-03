@@ -1,8 +1,6 @@
 package comment
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -12,10 +10,9 @@ type Service struct {
 
 type Comment struct {
 	gorm.Model
-	Slug    string
-	Body    string
-	Author  string
-	Created time.Time
+	Slug   string
+	Body   string
+	Author string
 }
 
 type CommentService interface {
